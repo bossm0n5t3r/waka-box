@@ -1,9 +1,7 @@
-require("dotenv").config();
-
 const {
   GIST_ID: gistId,
   GH_TOKEN: githubToken,
-  WAKATIME_API_KEY: wakatimeApiKey
+  WAKATIME_API_KEY: wakatimeApiKey,
 } = process.env;
 
 async function main() {
@@ -16,14 +14,14 @@ async function getWakaTimeStats() {
     "https://wakatime.com/api/v1/users/current/stats/last_7_days",
     {
       headers: {
-        Authorization: `Basic ${Buffer.from(wakatimeApiKey).toString("base64")}`
-      }
-    }
+        Authorization: `Basic ${Buffer.from(wakatimeApiKey).toString("base64")}`,
+      },
+    },
   );
 
   if (!response.ok) {
     throw new Error(
-      `Unable to get WakaTime stats: ${response.status} ${response.statusText}`
+      `Unable to get WakaTime stats: ${response.status} ${response.statusText}`,
     );
   }
 
@@ -43,13 +41,13 @@ async function githubRequest(path, options = {}) {
       Authorization: `Bearer ${githubToken}`,
       "User-Agent": "waka-box",
       "X-GitHub-Api-Version": "2026-03-10",
-      ...options.headers
-    }
+      ...options.headers,
+    },
   });
 
   if (!response.ok) {
     throw new Error(
-      `GitHub API request failed: ${response.status} ${response.statusText}`
+      `GitHub API request failed: ${response.status} ${response.statusText}`,
     );
   }
 
@@ -66,7 +64,7 @@ async function updateGist(stats) {
       trimRightStr(name, 10).padEnd(10),
       time.padEnd(14),
       generateBarChart(percent, 21),
-      String(percent.toFixed(1)).padStart(5) + "%"
+      String(percent.toFixed(1)).padStart(5) + "%",
     ];
 
     lines.push(line.join(" "));
@@ -85,16 +83,16 @@ async function updateGist(stats) {
   await githubRequest(path, {
     method: "PATCH",
     headers: {
-      "Content-Type": "application/json"
+      "Content-Type": "application/json",
     },
     body: JSON.stringify({
       files: {
         [filename]: {
           filename: "📊 Weekly development breakdown",
-          content: lines.join("\n")
-        }
-      }
-    })
+          content: lines.join("\n"),
+        },
+      },
+    }),
   });
 }
 

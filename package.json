@@ -5,19 +5,12 @@
   "author": "Matan Kushner <hello@matchai.me>",
   "license": "ISC",
   "scripts": {
-    "start": "node index.js"
-  },
-  "dependencies": {
-    "dotenv": "^16.0.3"
+    "start": "node index.js",
+    "start:local": "node --env-file=.env index.js",
+    "format": "prettier --write index.js package.json .github/workflows/schedule.yml",
+    "format:check": "prettier --check index.js package.json .github/workflows/schedule.yml"
   },
   "devDependencies": {
-    "husky": "3.1.0",
-    "prettier": "1.19.1",
-    "pretty-quick": "2.0.1"
-  },
-  "husky": {
-    "hooks": {
-      "pre-commit": "pretty-quick --staged"
-    }
+    "prettier": "3.9.6"
   }
 }
