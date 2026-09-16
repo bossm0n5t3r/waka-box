@@ -1,5 +1,4 @@
 require("dotenv").config();
-const { WakaTimeClient, RANGE } = require("wakatime-client");
 const { Octokit } = require("@octokit/rest");
 
 const {
@@ -8,13 +7,30 @@ const {
   WAKATIME_API_KEY: wakatimeApiKey
 } = process.env;
 
-const wakatime = new WakaTimeClient(wakatimeApiKey);
-
 const octokit = new Octokit({ auth: `token ${githubToken}` });
 
 async function main() {
-  const stats = await wakatime.getMyStats({ range: RANGE.LAST_7_DAYS });
+  const stats = await getWakaTimeStats();
   await updateGist(stats);
+}
+
+async function getWakaTimeStats() {
+  const response = await fetch(
+    "https://wakatime.com/api/v1/users/current/stats/last_7_days",
+    {
+      headers: {
+        Authorization: `Basic ${Buffer.from(wakatimeApiKey).toString("base64")}`
+      }
+    }
+  );
+
+  if (!response.ok) {
+    throw new Error(
+      `Unable to get WakaTime stats: ${response.status} ${response.statusText}`
+    );
+  }
+
+  return response.json();
 }
 
 function trimRightStr(str, len) {
