@@ -1,28 +1,64 @@
-<p align="center">
-  <img width="400" src="https://user-images.githubusercontent.com/4658208/60469862-2e40bf00-9c2c-11e9-87f7-afe164648de4.png">
-  <h3 align="center">waka-box</h3>
-  <p align="center">Update a pinned gist to contain your weekly WakaTime stats</p>
-</p>
+# waka-box
 
----
+Updates a GitHub Gist with the top five languages from the authenticated WakaTime account over the last seven days.
 
-> 📌✨ For more pinned-gist projects like this one, check out: https://github.com/matchai/awesome-pinned-gists
+This repository is a personal TypeScript adaptation of [matchai/waka-box](https://github.com/matchai/waka-box).
 
-## Setup
+## Requirements
 
-### Prep work
+- Node.js 24
+- pnpm 12
+- A public GitHub Gist
+- A classic GitHub personal access token with only the `gist` scope
+- A WakaTime API key
 
-1. Create a new public GitHub Gist (https://gist.github.com/)
-1. Create a token with the `gist` scope and copy it. (https://github.com/settings/tokens/new)
-1. Create a WakaTime account (https://wakatime.com/signup)
-1. In your WakaTime profile settings (https://wakatime.com/settings/profile) ensure `Display coding activity publicly` and `Display languages, editors, operating systems publicly` are checked.
-1. In your account settings, copy the existing WakaTime API Key (https://wakatime.com/settings/api-key)
+## GitHub Actions setup
 
-### Project setup
+Add the following repository secrets under **Settings > Secrets and variables > Actions**:
 
-1. Fork this repo
-1. Go to the repo **Settings > Secrets**
-1. Add the following environment variables:
-   - **GIST_ID:** The ID portion from your gist url: `https://gist.github.com/matchai/`**`6d5f84419863089a167387da62dd7081`**.
-   - **GH_TOKEN:** The GitHub token generated above.
-   - **WAKATIME_API_KEY:** The API key for your WakaTime account.
+| Secret             | Description                                       |
+| ------------------ | ------------------------------------------------- |
+| `GIST_ID`          | The identifier after the username in the Gist URL |
+| `GH_TOKEN`         | GitHub token with the `gist` scope                |
+| `WAKATIME_API_KEY` | API key from the WakaTime account settings        |
+
+The workflow runs every day at `00:00 UTC`. It can also be run manually from **Actions > Update gist with WakaTime
+stats > Run workflow**.
+
+## Local development
+
+Install the development dependencies:
+
+```sh
+pnpm install --frozen-lockfile
+```
+
+Create a local environment file from the tracked template:
+
+```sh
+cp sample.env .env
+```
+
+Fill in the three values in `.env`, then run:
+
+```sh
+pnpm start:local
+```
+
+The `.env` file is ignored by Git and must not be committed.
+
+## Verification
+
+```sh
+pnpm typecheck
+pnpm format:check
+pnpm audit
+```
+
+Node.js 24 runs `index.ts` directly using native type stripping. The runtime
+has no third-party dependencies, build step, or committed bundle.
+
+## License
+
+Based on [matchai/waka-box](https://github.com/matchai/waka-box).
+Distributed under the [ISC License](LICENSE), with the original copyright notice retained.
