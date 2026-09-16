@@ -1,13 +1,10 @@
 require("dotenv").config();
-const { Octokit } = require("@octokit/rest");
 
 const {
   GIST_ID: gistId,
   GH_TOKEN: githubToken,
   WAKATIME_API_KEY: wakatimeApiKey
 } = process.env;
-
-const octokit = new Octokit({ auth: `token ${githubToken}` });
 
 async function main() {
   const stats = await getWakaTimeStats();
@@ -38,14 +35,28 @@ function trimRightStr(str, len) {
   return str.length > len ? str.substring(0, len - 3) + "..." : str;
 }
 
-async function updateGist(stats) {
-  let gist;
-  try {
-    gist = await octokit.gists.get({ gist_id: gistId });
-  } catch (error) {
-    console.error(`Unable to get gist\n${error}`);
+async function githubRequest(path, options = {}) {
+  const response = await fetch(`https://api.github.com${path}`, {
+    ...options,
+    headers: {
+      Accept: "application/vnd.github+json",
+      Authorization: `Bearer ${githubToken}`,
+      "User-Agent": "waka-box",
+      "X-GitHub-Api-Version": "2026-03-10",
+      ...options.headers
+    }
+  });
+
+  if (!response.ok) {
+    throw new Error(
+      `GitHub API request failed: ${response.status} ${response.statusText}`
+    );
   }
 
+  return response.json();
+}
+
+async function updateGist(stats) {
   const lines = [];
   for (let i = 0; i < Math.min(stats.data.languages.length, 5); i++) {
     const data = stats.data.languages[i];
@@ -63,21 +74,28 @@ async function updateGist(stats) {
 
   if (lines.length == 0) return;
 
-  try {
-    // Get original filename to update that same file
-    const filename = Object.keys(gist.data.files)[0];
-    await octokit.gists.update({
-      gist_id: gistId,
+  const path = `/gists/${encodeURIComponent(gistId)}`;
+  const gist = await githubRequest(path);
+  const filename = Object.keys(gist.files)[0];
+
+  if (!filename) {
+    throw new Error("Gist has no files to update");
+  }
+
+  await githubRequest(path, {
+    method: "PATCH",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
       files: {
         [filename]: {
-          filename: `📊 Weekly development breakdown`,
+          filename: "📊 Weekly development breakdown",
           content: lines.join("\n")
         }
       }
-    });
-  } catch (error) {
-    console.error(`Unable to update gist\n${error}`);
-  }
+    })
+  });
 }
 
 function generateBarChart(percent, size) {
