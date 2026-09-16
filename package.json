@@ -5,12 +5,15 @@
   "author": "Matan Kushner <hello@matchai.me>",
   "license": "ISC",
   "scripts": {
-    "start": "node index.js",
-    "start:local": "node --env-file=.env index.js",
-    "format": "prettier --write index.js package.json .github/workflows/schedule.yml",
-    "format:check": "prettier --check index.js package.json .github/workflows/schedule.yml"
+    "start": "node index.ts",
+    "start:local": "node --env-file=.env index.ts",
+    "typecheck": "tsc",
+    "format": "prettier --write index.ts package.json tsconfig.json .github/workflows/schedule.yml",
+    "format:check": "prettier --check index.ts package.json tsconfig.json .github/workflows/schedule.yml"
   },
   "devDependencies": {
-    "prettier": "3.9.6"
+    "@types/node": "24.13.4",
+    "prettier": "3.9.6",
+    "typescript": "7.0.2"
   }
 }

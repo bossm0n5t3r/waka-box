@@ -1,15 +1,39 @@
-const {
-  GIST_ID: gistId,
-  GH_TOKEN: githubToken,
-  WAKATIME_API_KEY: wakatimeApiKey,
-} = process.env;
+type EnvironmentVariable = "GH_TOKEN" | "GIST_ID" | "WAKATIME_API_KEY";
 
-async function main() {
+interface WakaTimeLanguage {
+  name: string;
+  percent: number;
+  text: string;
+}
+
+interface WakaTimeStats {
+  data: {
+    languages: WakaTimeLanguage[];
+  };
+}
+
+interface GitHubGist {
+  files: Record<string, unknown>;
+}
+
+function requireEnvironmentVariable(name: EnvironmentVariable): string {
+  const value = process.env[name];
+  if (!value) {
+    throw new Error(`Missing required environment variable: ${name}`);
+  }
+  return value;
+}
+
+const gistId = requireEnvironmentVariable("GIST_ID");
+const githubToken = requireEnvironmentVariable("GH_TOKEN");
+const wakatimeApiKey = requireEnvironmentVariable("WAKATIME_API_KEY");
+
+async function main(): Promise<void> {
   const stats = await getWakaTimeStats();
   await updateGist(stats);
 }
 
-async function getWakaTimeStats() {
+async function getWakaTimeStats(): Promise<WakaTimeStats> {
   const response = await fetch(
     "https://wakatime.com/api/v1/users/current/stats/last_7_days",
     {
@@ -28,21 +52,24 @@ async function getWakaTimeStats() {
   return response.json();
 }
 
-function trimRightStr(str, len) {
+function trimRightStr(str: string, len: number): string {
   // Ellipsis takes 3 positions, so the index of substring is 0 to total length - 3.
   return str.length > len ? str.substring(0, len - 3) + "..." : str;
 }
 
-async function githubRequest(path, options = {}) {
+async function githubRequest<T>(
+  path: string,
+  options: RequestInit = {},
+): Promise<T> {
+  const headers = new Headers(options.headers);
+  headers.set("Accept", "application/vnd.github+json");
+  headers.set("Authorization", `Bearer ${githubToken}`);
+  headers.set("User-Agent", "waka-box");
+  headers.set("X-GitHub-Api-Version", "2026-03-10");
+
   const response = await fetch(`https://api.github.com${path}`, {
     ...options,
-    headers: {
-      Accept: "application/vnd.github+json",
-      Authorization: `Bearer ${githubToken}`,
-      "User-Agent": "waka-box",
-      "X-GitHub-Api-Version": "2026-03-10",
-      ...options.headers,
-    },
+    headers,
   });
 
   if (!response.ok) {
@@ -51,13 +78,12 @@ async function githubRequest(path, options = {}) {
     );
   }
 
-  return response.json();
+  return (await response.json()) as T;
 }
 
-async function updateGist(stats) {
+async function updateGist(stats: WakaTimeStats): Promise<void> {
   const lines = [];
-  for (let i = 0; i < Math.min(stats.data.languages.length, 5); i++) {
-    const data = stats.data.languages[i];
+  for (const data of stats.data.languages.slice(0, 5)) {
     const { name, percent, text: time } = data;
 
     const line = [
@@ -73,14 +99,14 @@ async function updateGist(stats) {
   if (lines.length == 0) return;
 
   const path = `/gists/${encodeURIComponent(gistId)}`;
-  const gist = await githubRequest(path);
+  const gist = await githubRequest<GitHubGist>(path);
   const filename = Object.keys(gist.files)[0];
 
   if (!filename) {
     throw new Error("Gist has no files to update");
   }
 
-  await githubRequest(path, {
+  await githubRequest<unknown>(path, {
     method: "PATCH",
     headers: {
       "Content-Type": "application/json",
@@ -96,7 +122,7 @@ async function updateGist(stats) {
   });
 }
 
-function generateBarChart(percent, size) {
+function generateBarChart(percent: number, size: number): string {
   const syms = "░▏▎▍▌▋▊▉█";
 
   const frac = Math.floor((size * 8 * percent) / 100);
