@@ -1,15 +1,19 @@
 {
   "name": "waka-box",
   "version": "3.0.0",
-  "description": "📊 Update a gist to contain your weekly WakaTime stats",
-  "author": "Matan Kushner <hello@matchai.me>",
+  "private": true,
+  "description": "Update a GitHub Gist with weekly WakaTime statistics",
+  "author": "bossm0n5t3r <bossm0n5t3r@gmail.com>",
+  "contributors": [
+    "Matan Kushner <hello@matchai.me>"
+  ],
   "license": "ISC",
   "scripts": {
     "start": "node index.ts",
     "start:local": "node --env-file=.env index.ts",
     "typecheck": "tsc",
-    "format": "prettier --write index.ts package.json tsconfig.json .github/workflows/schedule.yaml",
-    "format:check": "prettier --check index.ts package.json tsconfig.json .github/workflows/schedule.yaml"
+    "format": "prettier --write index.ts package.json tsconfig.json README.md .github/workflows/schedule.yaml",
+    "format:check": "prettier --check index.ts package.json tsconfig.json README.md .github/workflows/schedule.yaml"
   },
   "devDependencies": {
     "@types/node": "24.13.4",
