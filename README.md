@@ -16,11 +16,11 @@ This repository is a personal TypeScript adaptation of [matchai/waka-box](https:
 
 Add the following repository secrets under **Settings > Secrets and variables > Actions**:
 
-| Secret             | Description                                       |
-| ------------------ | ------------------------------------------------- |
-| `GIST_ID`          | The identifier after the username in the Gist URL |
-| `GH_TOKEN`         | GitHub token with the `gist` scope                |
-| `WAKATIME_API_KEY` | API key from the WakaTime account settings        |
+| Secret                 | Description                                       |
+|------------------------|---------------------------------------------------|
+| `GIST_ID`              | The identifier after the username in the Gist URL |
+| `GH_TOKEN`             | GitHub token with the `gist` scope                |
+| `WAKATIME_OAUTH_TOKEN` | API key from the WakaTime account settings        |
 
 The workflow runs every day at `00:00 UTC`. It can also be run manually from **Actions > Update gist with WakaTime
 stats > Run workflow**.

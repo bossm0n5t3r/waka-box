@@ -1,4 +1,4 @@
-type EnvironmentVariable = "GH_TOKEN" | "GIST_ID" | "WAKATIME_API_KEY";
+type EnvironmentVariable = "GH_TOKEN" | "GIST_ID" | "WAKATIME_OAUTH_TOKEN";
 
 interface WakaTimeLanguage {
   name: string;
@@ -26,7 +26,7 @@ function requireEnvironmentVariable(name: EnvironmentVariable): string {
 
 const gistId = requireEnvironmentVariable("GIST_ID");
 const githubToken = requireEnvironmentVariable("GH_TOKEN");
-const wakatimeApiKey = requireEnvironmentVariable("WAKATIME_API_KEY");
+const wakatimeApiKey = requireEnvironmentVariable("WAKATIME_OAUTH_TOKEN");
 
 async function main(): Promise<void> {
   const stats = await getWakaTimeStats();
