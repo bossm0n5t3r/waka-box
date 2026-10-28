@@ -16,24 +16,24 @@ interface GitHubGist {
   files: Record<string, unknown>;
 }
 
-function requireEnvironmentVariable(name: EnvironmentVariable): string {
+const requireEnvironmentVariable = (name: EnvironmentVariable): string => {
   const value = process.env[name];
   if (!value) {
     throw new Error(`Missing required environment variable: ${name}`);
   }
   return value;
-}
+};
 
 const gistId = requireEnvironmentVariable("GIST_ID");
 const githubToken = requireEnvironmentVariable("GH_TOKEN");
 const wakatimeApiKey = requireEnvironmentVariable("WAKATIME_OAUTH_TOKEN");
 
-async function main(): Promise<void> {
+const main = async (): Promise<void> => {
   const stats = await getWakaTimeStats();
   await updateGist(stats);
-}
+};
 
-async function getWakaTimeStats(): Promise<WakaTimeStats> {
+const getWakaTimeStats = async (): Promise<WakaTimeStats> => {
   const response = await fetch(
     "https://wakatime.com/api/v1/users/current/stats/last_7_days",
     {
@@ -50,17 +50,17 @@ async function getWakaTimeStats(): Promise<WakaTimeStats> {
   }
 
   return response.json();
-}
+};
 
-function trimRightStr(str: string, len: number): string {
+const trimRightStr = (str: string, len: number): string => {
   // Ellipsis takes 3 positions, so the index of substring is 0 to total length - 3.
   return str.length > len ? str.substring(0, len - 3) + "..." : str;
-}
+};
 
-async function githubRequest<T>(
+const githubRequest = async <T>(
   path: string,
   options: RequestInit = {},
-): Promise<T> {
+): Promise<T> => {
   const headers = new Headers(options.headers);
   headers.set("Accept", "application/vnd.github+json");
   headers.set("Authorization", `Bearer ${githubToken}`);
@@ -79,9 +79,9 @@ async function githubRequest<T>(
   }
 
   return (await response.json()) as T;
-}
+};
 
-async function updateGist(stats: WakaTimeStats): Promise<void> {
+const updateGist = async (stats: WakaTimeStats): Promise<void> => {
   const lines = [];
   for (const data of stats.data.languages.slice(0, 5)) {
     const { name, percent, text: time } = data;
@@ -120,9 +120,9 @@ async function updateGist(stats: WakaTimeStats): Promise<void> {
       },
     }),
   });
-}
+};
 
-function generateBarChart(percent: number, size: number): string {
+const generateBarChart = (percent: number, size: number): string => {
   const syms = "░▏▎▍▌▋▊▉█";
 
   const frac = Math.floor((size * 8 * percent) / 100);
@@ -135,7 +135,7 @@ function generateBarChart(percent: number, size: number): string {
   return [syms.substring(8, 9).repeat(barsFull), syms.substring(semi, semi + 1)]
     .join("")
     .padEnd(size, syms.substring(0, 1));
-}
+};
 
 (async () => {
   await main();
