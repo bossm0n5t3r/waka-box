@@ -6,9 +6,15 @@ interface WakaTimeLanguage {
   text: string;
 }
 
+interface WakaTimeCategory {
+  name: string;
+  total_seconds: number;
+}
+
 interface WakaTimeStats {
   data: {
     languages: WakaTimeLanguage[];
+    categories: WakaTimeCategory[];
   };
 }
 
@@ -27,10 +33,16 @@ const requireEnvironmentVariable = (name: EnvironmentVariable): string => {
 const gistId = requireEnvironmentVariable("GIST_ID");
 const githubToken = requireEnvironmentVariable("GH_TOKEN");
 const wakatimeApiKey = requireEnvironmentVariable("WAKATIME_OAUTH_TOKEN");
+const aiGistId = process.env.AI_GIST_ID || undefined;
+
+const AI_CATEGORY_NAME = "AI Coding";
 
 const main = async (): Promise<void> => {
   const stats = await getWakaTimeStats();
-  await updateGist(stats);
+  await updateLanguageGist(stats);
+  if (aiGistId) {
+    await updateAiGist(stats, aiGistId);
+  }
 };
 
 const getWakaTimeStats = async (): Promise<WakaTimeStats> => {
@@ -57,6 +69,25 @@ const trimRightStr = (str: string, len: number): string => {
   return str.length > len ? str.substring(0, len - 3) + "..." : str;
 };
 
+const formatDuration = (totalSeconds: number): string => {
+  const hours = Math.floor(totalSeconds / 3600);
+  const minutes = Math.floor((totalSeconds % 3600) / 60);
+
+  const parts = [];
+  if (hours > 0) parts.push(`${hours} ${hours === 1 ? "hr" : "hrs"}`);
+  if (minutes > 0) parts.push(`${minutes} ${minutes === 1 ? "min" : "mins"}`);
+
+  return parts.length > 0 ? parts.join(" ") : "0 secs";
+};
+
+const formatLine = (name: string, time: string, percent: number): string =>
+  [
+    trimRightStr(name, 10).padEnd(10),
+    time.padEnd(14),
+    generateBarChart(percent, 21),
+    String(percent.toFixed(1)).padStart(5) + "%",
+  ].join(" ");
+
 const githubRequest = async <T>(
   path: string,
   options: RequestInit = {},
@@ -81,24 +112,12 @@ const githubRequest = async <T>(
   return (await response.json()) as T;
 };
 
-const updateGist = async (stats: WakaTimeStats): Promise<void> => {
-  const lines = [];
-  for (const data of stats.data.languages.slice(0, 5)) {
-    const { name, percent, text: time } = data;
-
-    const line = [
-      trimRightStr(name, 10).padEnd(10),
-      time.padEnd(14),
-      generateBarChart(percent, 21),
-      String(percent.toFixed(1)).padStart(5) + "%",
-    ];
-
-    lines.push(line.join(" "));
-  }
-
-  if (lines.length == 0) return;
-
-  const path = `/gists/${encodeURIComponent(gistId)}`;
+const updateGistFile = async (
+  id: string,
+  title: string,
+  content: string,
+): Promise<void> => {
+  const path = `/gists/${encodeURIComponent(id)}`;
   const gist = await githubRequest<GitHubGist>(path);
   const filename = Object.keys(gist.files)[0];
 
@@ -114,12 +133,59 @@ const updateGist = async (stats: WakaTimeStats): Promise<void> => {
     body: JSON.stringify({
       files: {
         [filename]: {
-          filename: "📊 Weekly development breakdown",
-          content: lines.join("\n"),
+          filename: title,
+          content,
         },
       },
     }),
   });
+};
+
+const updateLanguageGist = async (stats: WakaTimeStats): Promise<void> => {
+  const lines = stats.data.languages
+    .slice(0, 5)
+    .map(({ name, percent, text }) => formatLine(name, text, percent));
+
+  if (lines.length == 0) return;
+
+  await updateGistFile(
+    gistId,
+    "📊 Weekly development breakdown",
+    lines.join("\n"),
+  );
+};
+
+const updateAiGist = async (
+  stats: WakaTimeStats,
+  id: string,
+): Promise<void> => {
+  const categories = stats.data.categories ?? [];
+  const totalSeconds = categories.reduce(
+    (sum, category) => sum + category.total_seconds,
+    0,
+  );
+
+  if (totalSeconds <= 0) return;
+
+  const aiSeconds =
+    categories.find((category) => category.name === AI_CATEGORY_NAME)
+      ?.total_seconds ?? 0;
+  const notAiSeconds = totalSeconds - aiSeconds;
+
+  const lines = [
+    formatLine(
+      "AI",
+      formatDuration(aiSeconds),
+      (aiSeconds / totalSeconds) * 100,
+    ),
+    formatLine(
+      "Not AI",
+      formatDuration(notAiSeconds),
+      (notAiSeconds / totalSeconds) * 100,
+    ),
+  ];
+
+  await updateGistFile(id, "🤖 Weekly AI coding breakdown", lines.join("\n"));
 };
 
 const generateBarChart = (percent: number, size: number): string => {

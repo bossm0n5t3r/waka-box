@@ -1,6 +1,7 @@
 # waka-box
 
 Updates a GitHub Gist with the top five languages from the authenticated WakaTime account over the last seven days.
+Optionally, it also updates a second Gist with the AI vs. non-AI coding time ratio.
 
 This repository is a personal TypeScript adaptation of [matchai/waka-box](https://github.com/matchai/waka-box).
 
@@ -21,6 +22,7 @@ Add the following repository secrets under **Settings > Secrets and variables > 
 | `GIST_ID`              | The identifier after the username in the Gist URL |
 | `GH_TOKEN`             | GitHub token with the `gist` scope                |
 | `WAKATIME_OAUTH_TOKEN` | API key from the WakaTime account settings        |
+| `AI_GIST_ID`           | Optional. Gist ID for the AI vs. non-AI breakdown |
 
 The workflow runs every day at `00:00 UTC`. It can also be run manually from **Actions > Update gist with WakaTime
 stats > Run workflow**.
@@ -39,7 +41,7 @@ Create a local environment file from the tracked template:
 cp sample.env .env
 ```
 
-Fill in the three values in `.env`, then run:
+Fill in the required values in `.env` (`AI_GIST_ID` is optional), then run:
 
 ```sh
 pnpm start:local
