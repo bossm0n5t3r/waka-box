@@ -32,7 +32,7 @@ const requireEnvironmentVariable = (name: EnvironmentVariable): string => {
 
 const gistId = requireEnvironmentVariable("GIST_ID");
 const githubToken = requireEnvironmentVariable("GH_TOKEN");
-const wakatimeApiKey = requireEnvironmentVariable("WAKATIME_OAUTH_TOKEN");
+const wakatimeOAuthToken = requireEnvironmentVariable("WAKATIME_OAUTH_TOKEN");
 const aiGistId = process.env.AI_GIST_ID || undefined;
 
 const AI_CATEGORY_NAME = "AI Coding";
@@ -50,7 +50,7 @@ const getWakaTimeStats = async (): Promise<WakaTimeStats> => {
     "https://wakatime.com/api/v1/users/current/stats/last_7_days",
     {
       headers: {
-        Authorization: `Basic ${Buffer.from(wakatimeApiKey).toString("base64")}`,
+        Authorization: `Basic ${Buffer.from(wakatimeOAuthToken).toString("base64")}`,
       },
     },
   );

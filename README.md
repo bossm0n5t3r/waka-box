@@ -11,7 +11,7 @@ This repository is a personal TypeScript adaptation of [matchai/waka-box](https:
 - pnpm 12
 - A public GitHub Gist
 - A classic GitHub personal access token with only the `gist` scope
-- A WakaTime API key
+- A WakaTime OAuth token
 
 ## GitHub Actions setup
 
@@ -21,7 +21,7 @@ Add the following repository secrets under **Settings > Secrets and variables > 
 | ---------------------- | ------------------------------------------------- |
 | `GIST_ID`              | The identifier after the username in the Gist URL |
 | `GH_TOKEN`             | GitHub token with the `gist` scope                |
-| `WAKATIME_OAUTH_TOKEN` | API key from the WakaTime account settings        |
+| `WAKATIME_OAUTH_TOKEN` | WakaTime OAuth token                              |
 | `AI_GIST_ID`           | Optional. Gist ID for the AI vs. non-AI breakdown |
 
 The workflow runs every day at `00:00 UTC`. It can also be run manually from **Actions > Update gist with WakaTime
