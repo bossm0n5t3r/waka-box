@@ -179,7 +179,7 @@ const updateAiGist = async (
       (aiSeconds / totalSeconds) * 100,
     ),
     formatLine(
-      "Not AI",
+      "Non-AI",
       formatDuration(notAiSeconds),
       (notAiSeconds / totalSeconds) * 100,
     ),
