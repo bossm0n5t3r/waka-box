@@ -3,8 +3,6 @@
 Updates a GitHub Gist with the top five languages from the authenticated WakaTime account over the last seven days.
 Optionally, it also updates a second Gist with the AI vs. non-AI coding time ratio.
 
-This repository is a personal TypeScript adaptation of [matchai/waka-box](https://github.com/matchai/waka-box).
-
 ## Requirements
 
 - Node.js 24
@@ -62,5 +60,5 @@ has no third-party dependencies, build step, or committed bundle.
 
 ## License
 
-Based on [matchai/waka-box](https://github.com/matchai/waka-box).
-Distributed under the [ISC License](LICENSE), with the original copyright notice retained.
+Originally derived from [matchai/waka-box](https://github.com/matchai/waka-box).
+Distributed under the [ISC License](LICENSE).

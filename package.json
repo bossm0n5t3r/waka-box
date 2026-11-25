@@ -4,9 +4,6 @@
   "private": true,
   "description": "Update a GitHub Gist with weekly WakaTime statistics",
   "author": "bossm0n5t3r <bossm0n5t3r@gmail.com>",
-  "contributors": [
-    "Matan Kushner <hello@matchai.me>"
-  ],
   "license": "ISC",
   "scripts": {
     "start": "node index.ts",
